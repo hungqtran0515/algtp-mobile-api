@@ -1,89 +1,31 @@
-# ALGTP Mobile API Server
+# ALGTP Mobile Proxy
 
-Simple, auth-free API server for ALGTP iOS app.
+Simple proxy server that forwards mobile app requests to the main ALGTP server.
+No authentication, no database - just a clean proxy.
 
-## Features
-- ✅ No authentication required
-- ✅ Direct Polygon API proxy
-- ✅ Float enrichment (FMP)
-- ✅ Mobile-optimized endpoints
+## How it Works
 
-## Endpoints
-
-- `GET /` - Health check
-- `GET /movers-premarket?limit=20` - Market movers (premarket session)
-- `GET /most-active?limit=20` - Most active stocks by volume
-- `GET /unusual-volume?limit=20` - Stocks with unusual volume spikes
-- `GET /scan?symbols=AAPL,MSFT,TSLA` - Scan specific symbols (for NQ100)
+Mobile App → Proxy (Render) → Main ALGTP Server (algtp-ai.onrender.com)
 
 ## Deploy to Render
 
-### 1. Create New Web Service
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click **New** → **Web Service**
-3. Connect to GitHub repo: `hungqtran0515/ALGTP-Mobile`
-4. Or use this repo and point to `mobile-server` directory
+1. Create GitHub repo: `algtp-mobile-proxy`
+2. Push this code
+3. Create Web Service on Render
+4. Add environment variable:
+   - `MAIN_SERVER_URL` = `https://algtp-ai.onrender.com`
 
-### 2. Configuration
-- **Name**: `algtp-mobile-api`
-- **Region**: Oregon (US West)
-- **Branch**: `main`
-- **Root Directory**: Leave blank (or `mobile-server` if in subdirectory)
-- **Runtime**: Node
-- **Build Command**: `npm install`
-- **Start Command**: `npm start`
-- **Instance Type**: Free
+## Endpoints
 
-### 3. Environment Variables
-Add these in Render Dashboard → Environment:
+All requests are proxied to the main server:
+- `/movers-premarket?limit=20`
+- `/most-active?limit=20`
+- `/unusual-volume?limit=20`
+- `/scan?symbols=AAPL,MSFT`
 
-```
-MASSIVE_API_KEY=<your_polygon_api_key>
-POLYGON_API_KEY=<your_polygon_api_key>
-FMP_API_KEY=<your_fmp_api_key>
-```
-
-### 4. Deploy
-Click **Create Web Service**. Render will:
-1. Clone your repo
-2. Run `npm install`
-3. Run `npm start`
-4. Your API will be live at: `https://algtp-mobile-api.onrender.com`
-
-## Test Deployment
+## Test
 
 ```bash
-# Health check
-curl https://algtp-mobile-api.onrender.com/
-
-# Market movers
-curl https://algtp-mobile-api.onrender.com/movers-premarket?limit=5
-```
-
-## Local Development
-
-```bash
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-# Edit .env and add your API keys
-
-# Run server
-npm start
-```
-
-Server runs on http://localhost:3000
-
-## iOS App Configuration
-
-The app will automatically connect to this server when on cellular. Update the production servers list in `APIService.swift`:
-
-```swift
-private let productionServers = [
-    "https://algtp-mobile-api.onrender.com",
-    "https://algtp-backup.onrender.com",
-    "https://algtp-ai.onrender.com"
-]
+curl https://algtp-mobile-proxy.onrender.com/
+curl https://algtp-mobile-proxy.onrender.com/movers-premarket?limit=3
 ```
